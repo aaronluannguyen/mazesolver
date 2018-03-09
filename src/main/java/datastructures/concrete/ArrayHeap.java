@@ -124,6 +124,11 @@ public class ArrayHeap<T extends Comparable<T>> implements IPriorityQueue<T> {
         
         return this.heap;
     }
+    
+    @Override
+    public void remove(T item) {
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public int size() {
