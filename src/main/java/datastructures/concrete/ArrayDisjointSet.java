@@ -30,6 +30,15 @@ public class ArrayDisjointSet<T> implements IDisjointSet<T> {
         if (setItems.containsKey(item)) {
             throw new IllegalArgumentException();
         }
+        
+        if (this.setIndex >= this.pointers.length) {
+            int[] newPointers = new int[this.pointers.length * 2];
+            for (int i = 0; i < this.pointers.length; i++) {
+                newPointers[i] = this.pointers[i];
+            }
+            this.pointers = newPointers;
+        }
+        
         this.pointers[this.setIndex] = -1;
         this.setItems.put(item, this.setIndex);
         this.setIndex++;
