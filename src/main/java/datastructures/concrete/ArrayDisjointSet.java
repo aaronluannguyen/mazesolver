@@ -28,19 +28,35 @@ public class ArrayDisjointSet<T> implements IDisjointSet<T> {
     @Override
     public void makeSet(T item) {
         if (setItems.containsKey(item)) {
-            throw new IllegalArgumentException("Illegal Argument Exception: Item already a part of this disjoing set");
+            throw new IllegalArgumentException();
         }
-        pointers[this.setIndex] = -1;
-        setItems.put(item, this.setIndex);
+        this.pointers[this.setIndex] = -1;
+        this.setItems.put(item, this.setIndex);
+        this.setIndex++;
     }
 
     @Override
     public int findSet(T item) {
-        throw new NotYetImplementedException();
+        if (!this.setItems.containsKey(item)) {
+            throw new IllegalArgumentException();
+        }
+        
+        return findSetHelper(this.setItems.get(item));
+    }
+    
+    private int findSetHelper(int index) {
+        if (this.pointers[index] < 0) {
+            return index;
+        } 
+        return findSetHelper(this.pointers[index]);
     }
 
     @Override
     public void union(T item1, T item2) {
-        throw new NotYetImplementedException();
+        if (!this.setItems.containsKey(item1) || !this.setItems.containsKey(item2)) {
+            throw new IllegalArgumentException();
+        }
+        
+        
     }
 }
