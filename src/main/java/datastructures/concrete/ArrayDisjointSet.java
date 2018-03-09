@@ -57,6 +57,19 @@ public class ArrayDisjointSet<T> implements IDisjointSet<T> {
             throw new IllegalArgumentException();
         }
         
+        int item1RootID = findSet(item1);
+        int item2RootID = findSet(item2);
         
+        if (item1RootID == item2RootID) {
+            throw new IllegalArgumentException();
+        }
+        
+        int rootRank1 = this.pointers[item1RootID];
+        int rootRank2 = this.pointers[item2RootID];
+        if (rootRank1 <= rootRank2) {
+            this.pointers[item2RootID] = item1RootID;
+        } else {
+            this.pointers[item1RootID] = item2RootID;
+        }
     }
 }
