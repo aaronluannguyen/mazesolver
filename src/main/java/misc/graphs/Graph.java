@@ -56,6 +56,7 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
     // get stuck, let us know we'll try and help you get unstuck as best as we can.
     
     private IDictionary<V, ISet<E>> graph;
+    private int totalEdges;
 
     /**
      * Constructs a new graph based on the given vertices and edges.
@@ -66,6 +67,7 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
      */
     public Graph(IList<V> vertices, IList<E> edges) {
         this.graph = new ChainedHashDictionary<V, ISet<E>>();
+        this.totalEdges = edges.size();
         
         for (E edge : edges) {
             if (edge.getWeight() < 0) {
@@ -115,14 +117,14 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
      * Returns the number of vertices contained within this graph.
      */
     public int numVertices() {
-        throw new NotYetImplementedException();
+        return this.graph.size();
     }
 
     /**
      * Returns the number of edges contained within this graph.
      */
     public int numEdges() {
-        throw new NotYetImplementedException();
+        return this.totalEdges;
     }
 
     /**
