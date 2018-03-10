@@ -1,6 +1,9 @@
 package misc.graphs;
 
+import datastructures.concrete.ChainedHashSet;
 import datastructures.concrete.DoubleLinkedList;
+import datastructures.concrete.dictionaries.ChainedHashDictionary;
+import datastructures.interfaces.IDictionary;
 import datastructures.interfaces.IList;
 import datastructures.interfaces.ISet;
 import misc.exceptions.NoPathExistsException;
@@ -14,7 +17,7 @@ import misc.exceptions.NotYetImplementedException;
  * We stick with supporting just a few, core set of operations needed for the
  * remainder of the project.
  */
-public class Graph<V, E extends Edge<V> & Comparable<E>> {
+public class Graph<V, E extends Edge<V> & Comparable<E>> {   
     // NOTE 1:
     //
     // Feel free to add as many fields, private helper methods, and private
@@ -52,6 +55,9 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
     // Working with generics is really not the focus of this class, so if you
     // get stuck, let us know we'll try and help you get unstuck as best as we can.
 
+    private IDictionary<V, ISet<E>> graph;
+    private int totalEdges;
+    
     /**
      * Constructs a new graph based on the given vertices and edges.
      *
@@ -60,9 +66,41 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
      *                                   present in the 'vertices' list
      */
     public Graph(IList<V> vertices, IList<E> edges) {
-        // TODO: Your code here
+        this.graph = new ChainedHashDictionary<V, ISet<E>>();
+        this.totalEdges = edges.size();
+        for(E edge : edges) {
+            if(edge.getWeight() < 0) {
+                throw new IllegalArgumentException();
+            }
+            if(!vertices.contains(edge.getVertex1()) || !vertices.contains(edge.getVertex2())) {
+                throw new IllegalArgumentException();
+            }
+
+            V vertex1 = edge.getVertex1();
+            V vertex2 = edge.getVertex2();
+            
+            updateGraph(vertex1, edge);
+            updateGraph(vertex2, edge);                       
+        }
+        
+//        for(V vertex : vertices) {
+//            if(!this.graph.containsKey(vertex)){
+//                this.graph.put(vertex, new ChainedHashSet<E>());
+//        }
+                 
+        
     }
 
+    private void updateGraph(V vertex, E edge) {
+        if(!this.graph.containsKey(vertex)) {
+            ISet<E> vertexEdges = new ChainedHashSet<E>();
+            vertexEdges.add(edge);
+            this.graph.put(vertex, vertexEdges);
+        }else {
+            this.graph.get(vertex).add(edge);
+        }
+    }
+    
     /**
      * Sometimes, we store vertices and edges as sets instead of lists, so we
      * provide this extra constructor to make converting between the two more
@@ -87,14 +125,14 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
      * Returns the number of vertices contained within this graph.
      */
     public int numVertices() {
-        throw new NotYetImplementedException();
+        return this.graph.size();
     }
 
     /**
      * Returns the number of edges contained within this graph.
      */
     public int numEdges() {
-        throw new NotYetImplementedException();
+        return this.totalEdges;
     }
 
     /**
