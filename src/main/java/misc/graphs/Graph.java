@@ -1,11 +1,15 @@
 package misc.graphs;
 
+import datastructures.concrete.ArrayDisjointSet;
 import datastructures.concrete.ChainedHashSet;
 import datastructures.concrete.DoubleLinkedList;
+import datastructures.concrete.KVPair;
 import datastructures.concrete.dictionaries.ChainedHashDictionary;
 import datastructures.interfaces.IDictionary;
+import datastructures.interfaces.IDisjointSet;
 import datastructures.interfaces.IList;
 import datastructures.interfaces.ISet;
+import misc.Searcher;
 import misc.exceptions.NoPathExistsException;
 import misc.exceptions.NotYetImplementedException;
 
@@ -57,6 +61,7 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
     
     private IDictionary<V, ISet<E>> graph;
     private int totalEdges;
+    private IList<E> graphEdges;
 
     /**
      * Constructs a new graph based on the given vertices and edges.
@@ -81,6 +86,8 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
             updateGraph(edge.getVertex1(), edge);
             updateGraph(edge.getVertex2(), edge);
         }
+        
+        this.graphEdges = edges;
     }
     
     private void updateGraph(V vertex, E edge) {
@@ -136,7 +143,23 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
      * Precondition: the graph does not contain any unconnected components.
      */
     public ISet<E> findMinimumSpanningTree() {
-        throw new NotYetImplementedException();
+        IDisjointSet<V> mst = new ArrayDisjointSet<V>();
+        ISet<E> result = new ChainedHashSet<E>();
+        
+        for (KVPair<V, ISet<E>> pair : this.graph) {
+            mst.makeSet(pair.getKey());
+        }
+        
+        IList<E> sortedEdges = Searcher.topKSort(this.totalEdges, this.graphEdges);
+        for (E edge : sortedEdges) {
+            V vertex1 = edge.getVertex1();
+            V vertex2 = edge.getVertex2();
+            if (mst.findSet(vertex1) != mst.findSet(vertex2)) {
+                mst.union(vertex1, vertex2);
+                result.add(edge);
+            }
+        }
+        return result;
     }
 
     /**
