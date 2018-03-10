@@ -71,11 +71,11 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
         
         for (E edge : edges) {
             if (edge.getWeight() < 0) {
-                throw new IllegalArgumentException("One of the edges have a negative weight");
+                throw new IllegalArgumentException();
             }
             
             if (!vertices.contains(edge.getVertex1()) || !vertices.contains(edge.getVertex2())) {
-                throw new IllegalArgumentException("One of the edges connects to a vertex not present in 'vertices' list");
+                throw new IllegalArgumentException();
             }
             
             updateGraph(edge.getVertex1(), edge);
