@@ -1,6 +1,9 @@
 package misc.graphs;
 
+import datastructures.concrete.ChainedHashSet;
 import datastructures.concrete.DoubleLinkedList;
+import datastructures.concrete.dictionaries.ChainedHashDictionary;
+import datastructures.interfaces.IDictionary;
 import datastructures.interfaces.IList;
 import datastructures.interfaces.ISet;
 import misc.exceptions.NoPathExistsException;
@@ -51,6 +54,8 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
     //
     // Working with generics is really not the focus of this class, so if you
     // get stuck, let us know we'll try and help you get unstuck as best as we can.
+    
+    private IDictionary<V, ISet<E>> graph;
 
     /**
      * Constructs a new graph based on the given vertices and edges.
@@ -60,7 +65,30 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
      *                                   present in the 'vertices' list
      */
     public Graph(IList<V> vertices, IList<E> edges) {
-        // TODO: Your code here
+        this.graph = new ChainedHashDictionary<V, ISet<E>>();
+        
+        for (E edge : edges) {
+            if (edge.getWeight() < 0) {
+                throw new IllegalArgumentException("One of the edges have a negative weight");
+            }
+            
+            if (!vertices.contains(edge.getVertex1()) || !vertices.contains(edge.getVertex2())) {
+                throw new IllegalArgumentException("One of the edges connects to a vertex not present in 'vertices' list");
+            }
+            
+            updateGraph(edge.getVertex1(), edge);
+            updateGraph(edge.getVertex2(), edge);
+        }
+    }
+    
+    private void updateGraph(V vertex, E edge) {
+        if (!this.graph.containsKey(vertex)) {
+            ISet<E> vertexEdges = new ChainedHashSet<E>();
+            vertexEdges.add(edge);
+            this.graph.put(vertex, vertexEdges);
+        } else {
+            this.graph.get(vertex).add(edge);
+        }
     }
 
     /**
