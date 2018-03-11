@@ -190,4 +190,19 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
         
         vertexCosts.put(start, 0.0);
     }
+    
+    private static class VertexNode<V> implements Comparable<VertexNode<V>> {
+        private V vertex;
+        private double cost;
+        
+        public VertexNode(V vertex, double cost) {
+            this.vertex = vertex;
+            this.cost = cost;
+        }
+        
+        @Override
+        public int compareTo(VertexNode<V> other) {
+            return Double.compare(this.cost, other.cost);
+        }
+    }
 }
