@@ -135,9 +135,10 @@ public class ArrayHeap<T extends Comparable<T>> implements IPriorityQueue<T> {
             }
         }
         
-        this.heap[targetIndex] = this.heap[this.length - 1];
-        this.heap = insertHelper(targetIndex);
         this.length--;
+        this.heap[targetIndex] = this.heap[this.length];
+        this.heap = insertHelper(targetIndex);
+        this.heap = removeMinHelper(targetIndex);
     }
 
     @Override
