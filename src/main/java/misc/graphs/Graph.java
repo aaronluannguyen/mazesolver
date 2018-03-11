@@ -62,6 +62,7 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
     private IDictionary<V, ISet<E>> graph;
     private int totalEdges;
     private IList<E> graphEdges;
+    private IList<V> graphVertices;
 
     /**
      * Constructs a new graph based on the given vertices and edges.
@@ -73,6 +74,7 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
     public Graph(IList<V> vertices, IList<E> edges) {
         this.graph = new ChainedHashDictionary<V, ISet<E>>();
         this.totalEdges = edges.size();
+        this.graphVertices = vertices;
         
         for (E edge : edges) {
             if (edge.getWeight() < 0) {
@@ -175,6 +177,17 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
      * @throws NoPathExistsException  if there does not exist a path from the start to the end
      */
     public IList<E> findShortestPathBetween(V start, V end) {
-        throw new NotYetImplementedException();
+        IList<E> result = new DoubleLinkedList<E>();
+        IDictionary<V, Double> vertexCosts = new ChainedHashDictionary<V, Double>();
+        
+        if (start == end) {
+            return result;
+        }
+        
+        for (V vertex : this.graphVertices) {
+            vertexCosts.put(vertex, Double.POSITIVE_INFINITY);
+        }
+        
+        vertexCosts.put(start, 0.0);
     }
 }
