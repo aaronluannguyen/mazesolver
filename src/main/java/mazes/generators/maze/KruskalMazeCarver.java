@@ -39,7 +39,7 @@ public class KruskalMazeCarver implements MazeCarver {
         Graph<Room, Wall> graph = new Graph<Room, Wall>(rooms, randomWalls);
         ISet<Wall> mstWalls = graph.findMinimumSpanningTree();
         
-        for (Wall wall : mstWalls) {
+        for (Wall wall : randomWalls) {
             wall.resetDistanceToOriginal();
         }
         
