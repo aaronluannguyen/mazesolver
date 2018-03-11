@@ -232,4 +232,22 @@ public class TestArrayHeapFunctionality extends BaseTest {
         IPriorityQueue<Integer> heap = this.makeBasic();
         assertFalse(heap.isEmpty());
     }
+    
+    @Test(timeout=SECOND)
+    public void testSimpleRemove() {
+        IPriorityQueue<Integer> heap = this.makeBasic();
+        IPriorityQueue<Integer> heapTest = this.makeInstance();
+        heapTest.insert(1);
+        //heapTest.insert(2);
+        //heapTest.insert(3);
+        //heapTest.insert(4);
+        heapTest.insert(5);
+        heap.remove(4);
+        heap.remove(3);
+        heap.remove(2);
+
+        while (!heap.isEmpty()) {
+            assertEquals(heap.removeMin(), heapTest.removeMin());
+        }
+    }
 }
