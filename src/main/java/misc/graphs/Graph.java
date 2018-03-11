@@ -1,6 +1,7 @@
 package misc.graphs;
 
 import datastructures.concrete.ArrayDisjointSet;
+import datastructures.concrete.ArrayHeap;
 import datastructures.concrete.ChainedHashSet;
 import datastructures.concrete.DoubleLinkedList;
 import datastructures.concrete.KVPair;
@@ -8,10 +9,10 @@ import datastructures.concrete.dictionaries.ChainedHashDictionary;
 import datastructures.interfaces.IDictionary;
 import datastructures.interfaces.IDisjointSet;
 import datastructures.interfaces.IList;
+import datastructures.interfaces.IPriorityQueue;
 import datastructures.interfaces.ISet;
 import misc.Searcher;
 import misc.exceptions.NoPathExistsException;
-import misc.exceptions.NotYetImplementedException;
 
 /**
  * Represents an undirected, weighted graph, possibly containing self-loops, parallel edges,
@@ -179,6 +180,7 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
     public IList<E> findShortestPathBetween(V start, V end) {
         IList<E> result = new DoubleLinkedList<E>();
         IDictionary<V, Double> vertexCosts = new ChainedHashDictionary<V, Double>();
+        IPriorityQueue<VertexNode<V>> heap = new ArrayHeap<VertexNode<V>>();
         
         if (start == end) {
             return result;
@@ -189,6 +191,44 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
         }
         
         vertexCosts.put(start, 0.0);
+        ISet<E> startEdges = this.graph.get(start);
+        for (E edge : startEdges) {
+            vertexCosts.put(edge.getOtherVertex(start), 0.0 + edge.getWeight());
+            heap.insert(new VertexNode<V>(edge.getOtherVertex(start), 0.0 + edge.getWeight()));
+            result.add(edge);
+        }
+        
+        while (!heap.isEmpty() && heap.peekMin() != end) {
+            VertexNode<V> minVertex = heap.removeMin();
+            for (E edge : this.graph.get(minVertex.getVertex())) {
+                double newCost = minVertex.getCost() + edge.getWeight();
+                V newVertex = edge.getOtherVertex(minVertex.getVertex());
+                VertexNode<V> original = new VertexNode<V>(newVertex, vertexCosts.get(newVertex));
+                if (vertexCosts.get(newVertex) == Double.POSITIVE_INFINITY) {
+                    heap.insert(new VertexNode<V>(newVertex, newCost));
+                    vertexCosts.put(newVertex, newCost);
+                    result.add(edge);
+                } else {
+                    if (newCost < vertexCosts.get(newVertex)) {
+                        heap.remove(original);
+                        heap.insert(new VertexNode<V>(newVertex, newCost));
+                        vertexCosts.put(newVertex, newCost);
+                        for (int i = 0; i < result.size(); i++) {
+                            if (result.get(i).getVertex2() == newVertex) {
+                                result.delete(i);
+                            }
+                        }
+                        result.add(edge);
+                    }
+                }
+            }
+        }
+        
+        if (vertexCosts.get(end) == Double.POSITIVE_INFINITY) {
+            throw new NoPathExistsException();
+        }
+        
+        return result;
     }
     
     private static class VertexNode<V> implements Comparable<VertexNode<V>> {
@@ -198,6 +238,14 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
         public VertexNode(V vertex, double cost) {
             this.vertex = vertex;
             this.cost = cost;
+        }
+        
+        public V getVertex() {
+            return this.vertex;
+        }
+        
+        public double getCost() {
+            return this.cost;
         }
         
         @Override
