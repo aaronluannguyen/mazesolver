@@ -196,13 +196,19 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
         
         ISet<E> startEdges = this.graph.get(start);
         for (E edge : startEdges) {
-            vertexCosts.put(edge.getOtherVertex(start), 0.0 + edge.getWeight());
-            heap.insert(new VertexNode<V>(edge.getOtherVertex(start), 0.0 + edge.getWeight()));
-            allPaths.put(edge.getOtherVertex(start), edge);
+            V otherVertex = edge.getOtherVertex(start);
+            
+            heap.insert(new VertexNode<V>(otherVertex, 0.0 + edge.getWeight()));
+            if (vertexCosts.get(edge.getOtherVertex(start)) == Double.POSITIVE_INFINITY
+                    || edge.getWeight() < vertexCosts.get(otherVertex)) {
+                
+                allPaths.put(edge.getOtherVertex(start), edge);
+                vertexCosts.put(otherVertex, 0.0 + edge.getWeight());
+            }
         }
         visited.add(start);
         
-        while (!heap.isEmpty() && heap.peekMin() != end) {
+        while (!heap.isEmpty()) {
             VertexNode<V> currVertexNode = heap.removeMin();
             V currVertex = currVertexNode.getVertex();
             double cost = currVertexNode.getCost();
@@ -214,7 +220,9 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
                     V newVertex = edge.getOtherVertex(currVertex);
                     
                     heap.insert(new VertexNode<V>(newVertex, newCost));
-                    if (newCost < vertexCosts.get(newVertex)) {
+                    
+                    if (vertexCosts.get(newVertex) == Double.POSITIVE_INFINITY
+                            || (!visited.contains(newVertex) && newCost < vertexCosts.get(newVertex))) {
                         vertexCosts.put(newVertex, newCost);
                         allPaths.put(edge.getOtherVertex(currVertex), edge);
                     }
