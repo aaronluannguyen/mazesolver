@@ -110,7 +110,7 @@ public class ArrayHeap<T extends Comparable<T>> implements IPriorityQueue<T> {
         
         if (this.length > 1) {
             this.heap = insertHelper(this.length - 1);
-        }
+        }        
     }
     
     private T[] insertHelper(int index) {
@@ -127,7 +127,18 @@ public class ArrayHeap<T extends Comparable<T>> implements IPriorityQueue<T> {
     
     @Override
     public void remove(T item) {
-        throw new UnsupportedOperationException();
+        int targetIndex = 0;
+        for(int i = 0; i < this.length; i++) {
+            if (this.heap[i] == item || this.heap[i].equals(item)) {
+                targetIndex = i;
+                i = this.length;
+            }
+        }
+        T temp = this.heap[this.length - 1];
+        this.heap[targetIndex] = this.heap[this.length - 1];
+        this.length--;
+        this.heap = insertHelper(targetIndex);
+        this.heap = removeMinHelper(targetIndex);                
     }
 
     @Override

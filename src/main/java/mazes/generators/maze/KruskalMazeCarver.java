@@ -32,17 +32,17 @@ public class KruskalMazeCarver implements MazeCarver {
                 
         for(Wall wall : walls) {
             if(!untouchableWalls.contains(wall)) {
-                double randDist = (rand.nextDouble()) * 100;
-                System.out.println(randDist);
-                System.out.println("Before: " + wall.getDistance());
-                wall.setDistance(randDist);
-                System.out.println("After: " + wall.getDistance());
-                randomWalls.add(wall);                
-                wall.resetDistanceToOriginal();                
+                double randDist = (rand.nextDouble()) * 100;                              
+                wall.setDistance(randDist);                
+                randomWalls.add(wall);                                                             
             }
         }
         Graph<Room, Wall> graph = new Graph<Room, Wall>(rooms, randomWalls);
         ISet<Wall> mstWalls = graph.findMinimumSpanningTree();
+        
+        for(Wall wall : randomWalls) {
+            wall.resetDistanceToOriginal();
+        }
         
         return mstWalls;
     }

@@ -1,6 +1,7 @@
 package misc.graphs;
 
 import datastructures.concrete.ArrayDisjointSet;
+import datastructures.concrete.ArrayHeap;
 import datastructures.concrete.ChainedHashSet;
 import datastructures.concrete.DoubleLinkedList;
 import datastructures.concrete.KVPair;
@@ -8,6 +9,7 @@ import datastructures.concrete.dictionaries.ChainedHashDictionary;
 import datastructures.interfaces.IDictionary;
 import datastructures.interfaces.IDisjointSet;
 import datastructures.interfaces.IList;
+import datastructures.interfaces.IPriorityQueue;
 import datastructures.interfaces.ISet;
 import misc.Searcher;
 import misc.exceptions.NoPathExistsException;
@@ -62,6 +64,7 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
     private IDictionary<V, ISet<E>> graph;
     private int totalEdges;
     private IList<E> graphEdges;
+    private IList<V> graphVertices;
     
     /**
      * Constructs a new graph based on the given vertices and edges.
@@ -74,6 +77,7 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
         this.graph = new ChainedHashDictionary<V, ISet<E>>();
         this.totalEdges = edges.size();
         this.graphEdges = edges;
+        this.graphVertices = vertices;
         for(E edge : edges) {
             if(edge.getWeight() < 0) {
                 throw new IllegalArgumentException();
@@ -182,6 +186,99 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
      * @throws NoPathExistsException  if there does not exist a path from the start to the end
      */
     public IList<E> findShortestPathBetween(V start, V end) {
-        throw new NotYetImplementedException();
+        IDictionary<V, E> allPaths = new ChainedHashDictionary<V, E>(); 
+        IList<E> resultReversed = new DoubleLinkedList<E>();
+        IList<E> result = new DoubleLinkedList<E>();
+        IDictionary<V, Double> vertexCosts = new ChainedHashDictionary<V, Double>();
+        IPriorityQueue<VertexNode<V>> heap = new ArrayHeap<VertexNode<V>>();
+        ISet<V> visited = new ChainedHashSet<V>();
+                
+        if(start == end) {
+            return result;
+        }
+        for(V vertex : this.graphVertices) {
+            vertexCosts.put(vertex, Double.POSITIVE_INFINITY);
+        }
+        if(this.graph.isEmpty() || !this.graph.containsKey(start) || !this.graph.containsKey(end)){
+            throw new NoPathExistsException();
+        }
+        
+        vertexCosts.put(start, 0.0);        
+        ISet<E> startEdges = this.graph.get(start);
+        visited.add(start);        
+        findShortestPathHelper(start, 0.0, heap, allPaths, vertexCosts, visited);  
+        
+        while(!heap.isEmpty()) {            
+            VertexNode<V> currVertexNode = heap.removeMin();            
+            V currVertex = currVertexNode.getVertex();
+            double cost = currVertexNode.getCost();
+            
+            if (!visited.contains(currVertex)) {                
+                visited.add(currVertex);
+                findShortestPathHelper(currVertex, cost, heap, allPaths, vertexCosts, visited);
+            }                                                         
+        }
+        
+        if(vertexCosts.get(end) == Double.POSITIVE_INFINITY) {
+            throw new NoPathExistsException();
+        }       
+        
+        V find = end;
+        while(allPaths.get(find).getOtherVertex(find) != start) {
+                       
+            E addEdge = allPaths.get(find);            
+            resultReversed.add(addEdge);
+            find = addEdge.getOtherVertex(find);            
+        }            
+        resultReversed.add(allPaths.get(find));       
+        
+        while(!resultReversed.isEmpty()) {
+            result.add(resultReversed.remove());
+        }
+        
+        return result;
+    }
+    
+    private void findShortestPathHelper(V currVertex, double cost, IPriorityQueue<VertexNode<V>> heap, IDictionary<V, E> allPaths,
+            IDictionary<V, Double> vertexCosts, ISet<V> visited) {
+        for (E edge : this.graph.get(currVertex)) {
+            double newCost = cost + edge.getWeight();
+            V newVertex = edge.getOtherVertex(currVertex);            
+            heap.insert(new VertexNode<V>(newVertex, newCost));            
+            if (vertexCosts.get(newVertex) == Double.POSITIVE_INFINITY || 
+                    (!visited.contains(newVertex) && newCost < vertexCosts.get(newVertex))) {                        
+                vertexCosts.put(newVertex, newCost);                        
+                allPaths.put(edge.getOtherVertex(currVertex), edge);
+            }
+        }        
+    }
+    
+    private class VertexNode<V> implements Comparable<VertexNode<V>> {
+        private V vertex;
+        private double cost;
+        
+        public VertexNode(V vertex, double cost) {
+            this.vertex = vertex;
+            this.cost = cost;
+        }
+        
+        public V getVertex() {
+            return this.vertex;
+        }
+        
+        public Double getCost() {
+            return this.cost;
+        }
+        
+        @Override
+        public int compareTo(VertexNode<V> other) {
+            // TODO Auto-generated method stub
+            return Double.compare(this.cost, other.cost);
+        }
+        
+        public String toString() {
+            return "Vertex " + this.vertex.toString() + " " + this.cost;
+        }
+        
     }
 }
