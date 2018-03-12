@@ -189,6 +189,10 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
             return result;
         }
         
+        if (this.graph.isEmpty() || !this.graph.containsKey(start) || !this.graph.containsKey(end)) {
+            throw new NoPathExistsException();
+        }
+        
         for (V vertex : this.graphVertices) {
             vertexCosts.put(vertex, Double.POSITIVE_INFINITY);
         }
