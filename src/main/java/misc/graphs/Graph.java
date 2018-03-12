@@ -178,20 +178,21 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
      * @throws NoPathExistsException  if there does not exist a path from the start to the end
      */
     public IList<E> findShortestPathBetween(V start, V end) {
+        IList<E> result = new DoubleLinkedList<E>();
         IList<E> resultReversed = new DoubleLinkedList<E>();
         IDictionary<V, E> allPaths = new ChainedHashDictionary<V, E>();
         IDictionary<V, Double> vertexCosts = new ChainedHashDictionary<V, Double>();
         IPriorityQueue<VertexNode<V>> heap = new ArrayHeap<VertexNode<V>>();
         
         if (start == end) {
-            return resultReversed;
+            return result;
         }
         
         for (V vertex : this.graphVertices) {
             vertexCosts.put(vertex, Double.POSITIVE_INFINITY);
         }
-        
         vertexCosts.put(start, 0.0);
+        
         ISet<E> startEdges = this.graph.get(start);
         for (E edge : startEdges) {
             vertexCosts.put(edge.getOtherVertex(start), 0.0 + edge.getWeight());
@@ -222,6 +223,10 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
             }
         }
         
+        if (vertexCosts.get(end) == Double.POSITIVE_INFINITY) {
+            throw new NoPathExistsException();
+        }
+        
         V find = end;
         while (allPaths.get(find).getOtherVertex(find) != start) {
             E addEdge = allPaths.get(find);
@@ -231,14 +236,8 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
         
         resultReversed.add(allPaths.get(find));
         
-        
-        IList<E> result = new DoubleLinkedList<E>();
         while (!resultReversed.isEmpty()) {
             result.add(resultReversed.remove());
-        }
-        
-        if (vertexCosts.get(end) == Double.POSITIVE_INFINITY) {
-            throw new NoPathExistsException();
         }
         
         return result;
