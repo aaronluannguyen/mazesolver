@@ -198,18 +198,8 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
         }
         vertexCosts.put(start, 0.0);
         
-        ISet<E> startEdges = this.graph.get(start);
-        for (E edge : startEdges) {
-            V otherVertex = edge.getOtherVertex(start);
-            
-            heap.insert(new VertexNode<V>(otherVertex, 0.0 + edge.getWeight()));
-            if (vertexCosts.get(edge.getOtherVertex(start)) == Double.POSITIVE_INFINITY
-                    || edge.getWeight() < vertexCosts.get(otherVertex)) {
-                
-                allPaths.put(edge.getOtherVertex(start), edge);
-                vertexCosts.put(otherVertex, 0.0 + edge.getWeight());
-            }
-        }
+        findShortestPathHelper(start, 0.0, heap, visited, vertexCosts, allPaths);
+
         visited.add(start);
         
         while (!heap.isEmpty()) {
@@ -219,18 +209,7 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
             
             if (!visited.contains(currVertex)) {
                 visited.add(currVertex);
-                for (E edge : this.graph.get(currVertex)) {
-                    double newCost = cost + edge.getWeight();
-                    V newVertex = edge.getOtherVertex(currVertex);
-                    
-                    heap.insert(new VertexNode<V>(newVertex, newCost));
-                    
-                    if (vertexCosts.get(newVertex) == Double.POSITIVE_INFINITY
-                            || (!visited.contains(newVertex) && newCost < vertexCosts.get(newVertex))) {
-                        vertexCosts.put(newVertex, newCost);
-                        allPaths.put(edge.getOtherVertex(currVertex), edge);
-                    }
-                }
+                findShortestPathHelper(currVertex, cost, heap, visited, vertexCosts, allPaths);
             }
         }
         
@@ -252,6 +231,23 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
         }
         
         return result;
+    }
+    
+    private void findShortestPathHelper(V vertex, double cost, IPriorityQueue<VertexNode<V>> heap, 
+            ISet<V> visited, IDictionary<V, Double> vertexCosts, IDictionary<V, E> allPaths) {
+        
+        for (E edge : this.graph.get(vertex)) {
+            double newCost = cost + edge.getWeight();
+            V newVertex = edge.getOtherVertex(vertex);
+            
+            heap.insert(new VertexNode<V>(newVertex, newCost));
+            
+            if (vertexCosts.get(newVertex) == Double.POSITIVE_INFINITY
+                    || (!visited.contains(newVertex) && newCost < vertexCosts.get(newVertex))) {
+                vertexCosts.put(newVertex, newCost);
+                allPaths.put(edge.getOtherVertex(vertex), edge);
+            }
+        }
     }
     
     private static class VertexNode<V> implements Comparable<VertexNode<V>> {
