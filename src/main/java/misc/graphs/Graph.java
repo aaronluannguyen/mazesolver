@@ -181,6 +181,7 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
         IList<E> result = new DoubleLinkedList<E>();
         IList<E> resultReversed = new DoubleLinkedList<E>();
         IDictionary<V, E> allPaths = new ChainedHashDictionary<V, E>();
+        ISet<V> visited = new ChainedHashSet<V>();
         IDictionary<V, Double> vertexCosts = new ChainedHashDictionary<V, Double>();
         IPriorityQueue<VertexNode<V>> heap = new ArrayHeap<VertexNode<V>>();
         
@@ -199,27 +200,46 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
             heap.insert(new VertexNode<V>(edge.getOtherVertex(start), 0.0 + edge.getWeight()));
             allPaths.put(edge.getOtherVertex(start), edge);
         }
+        visited.add(start);
         
         while (!heap.isEmpty() && heap.peekMin() != end) {
-            VertexNode<V> minVertex = heap.removeMin();
-            for (E edge : this.graph.get(minVertex.getVertex())) {
-                double newCost = minVertex.getCost() + edge.getWeight();
-                V newVertex = edge.getOtherVertex(minVertex.getVertex());
-                
-                VertexNode<V> original = new VertexNode<V>(newVertex, vertexCosts.get(newVertex));
-                
-                if (vertexCosts.get(newVertex) == Double.POSITIVE_INFINITY) {
+            VertexNode<V> currVertexNode = heap.removeMin();
+            V currVertex = currVertexNode.getVertex();
+            double cost = currVertexNode.getCost();
+            
+            if (!visited.contains(currVertex)) {
+                visited.add(currVertex);
+                for (E edge : this.graph.get(currVertex)) {
+                    double newCost = cost + edge.getWeight();
+                    V newVertex = edge.getOtherVertex(currVertex);
+                    
                     heap.insert(new VertexNode<V>(newVertex, newCost));
-                    vertexCosts.put(newVertex, newCost);
-                    allPaths.put(edge.getOtherVertex(minVertex.getVertex()), edge);
-                } else {
                     if (newCost < vertexCosts.get(newVertex)) {
-                        heap.remove(original);
-                        heap.insert(new VertexNode<V>(newVertex, newCost));
                         vertexCosts.put(newVertex, newCost);
-                        allPaths.put(edge.getOtherVertex(minVertex.getVertex()), edge);
+                        allPaths.put(edge.getOtherVertex(currVertex), edge);
                     }
                 }
+            
+                
+                
+                
+//                double newCost = minVertex.getCost() + edge.getWeight();
+//                V newVertex = edge.getOtherVertex(minVertex.getVertex());
+//                
+//                VertexNode<V> original = new VertexNode<V>(newVertex, vertexCosts.get(newVertex));
+//                
+//                if (vertexCosts.get(newVertex) == Double.POSITIVE_INFINITY) {
+//                    heap.insert(new VertexNode<V>(newVertex, newCost));
+//                    vertexCosts.put(newVertex, newCost);
+//                    allPaths.put(edge.getOtherVertex(minVertex.getVertex()), edge);
+//                } else {
+//                    if (newCost < vertexCosts.get(newVertex)) {
+//                        heap.remove(original);
+//                        heap.insert(new VertexNode<V>(newVertex, newCost));
+//                        vertexCosts.put(newVertex, newCost);
+//                        allPaths.put(edge.getOtherVertex(minVertex.getVertex()), edge);
+//                    }
+//                }
             }
         }
         
@@ -258,6 +278,10 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
         
         public double getCost() {
             return this.cost;
+        }
+        
+        public String toString() {
+            return "" + this.vertex + " " + this.cost;
         }
         
         @Override
