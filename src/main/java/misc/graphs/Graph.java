@@ -178,12 +178,13 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
      * @throws NoPathExistsException  if there does not exist a path from the start to the end
      */
     public IList<E> findShortestPathBetween(V start, V end) {
-        IList<E> result = new DoubleLinkedList<E>();
+        IList<E> resultReversed = new DoubleLinkedList<E>();
+        IDictionary<V, E> allPaths = new ChainedHashDictionary<V, E>();
         IDictionary<V, Double> vertexCosts = new ChainedHashDictionary<V, Double>();
         IPriorityQueue<VertexNode<V>> heap = new ArrayHeap<VertexNode<V>>();
         
         if (start == end) {
-            return result;
+            return resultReversed;
         }
         
         for (V vertex : this.graphVertices) {
@@ -195,7 +196,7 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
         for (E edge : startEdges) {
             vertexCosts.put(edge.getOtherVertex(start), 0.0 + edge.getWeight());
             heap.insert(new VertexNode<V>(edge.getOtherVertex(start), 0.0 + edge.getWeight()));
-            result.add(edge);
+            allPaths.put(edge.getOtherVertex(start), edge);
         }
         
         while (!heap.isEmpty() && heap.peekMin() != end) {
@@ -203,25 +204,37 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
             for (E edge : this.graph.get(minVertex.getVertex())) {
                 double newCost = minVertex.getCost() + edge.getWeight();
                 V newVertex = edge.getOtherVertex(minVertex.getVertex());
+                
                 VertexNode<V> original = new VertexNode<V>(newVertex, vertexCosts.get(newVertex));
+                
                 if (vertexCosts.get(newVertex) == Double.POSITIVE_INFINITY) {
                     heap.insert(new VertexNode<V>(newVertex, newCost));
                     vertexCosts.put(newVertex, newCost);
-                    result.add(edge);
+                    allPaths.put(edge.getOtherVertex(minVertex.getVertex()), edge);
                 } else {
                     if (newCost < vertexCosts.get(newVertex)) {
                         heap.remove(original);
                         heap.insert(new VertexNode<V>(newVertex, newCost));
                         vertexCosts.put(newVertex, newCost);
-                        for (int i = 0; i < result.size(); i++) {
-                            if (result.get(i).getVertex2() == newVertex) {
-                                result.delete(i);
-                            }
-                        }
-                        result.add(edge);
+                        allPaths.put(edge.getOtherVertex(minVertex.getVertex()), edge);
                     }
                 }
             }
+        }
+        
+        V find = end;
+        while (allPaths.get(find).getOtherVertex(find) != start) {
+            E addEdge = allPaths.get(find);
+            resultReversed.add(addEdge);
+            find = addEdge.getOtherVertex(find);
+        }
+        
+        resultReversed.add(allPaths.get(find));
+        
+        
+        IList<E> result = new DoubleLinkedList<E>();
+        while (!resultReversed.isEmpty()) {
+            result.add(resultReversed.remove());
         }
         
         if (vertexCosts.get(end) == Double.POSITIVE_INFINITY) {
