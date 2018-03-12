@@ -219,7 +219,7 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
                         allPaths.put(edge.getOtherVertex(currVertex), edge);
                     }
                 }
-            
+            }
                 
                 
                 
@@ -240,7 +240,7 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
 //                        allPaths.put(edge.getOtherVertex(minVertex.getVertex()), edge);
 //                    }
 //                }
-            }
+//            }
         }
         
         if (vertexCosts.get(end) == Double.POSITIVE_INFINITY) {
