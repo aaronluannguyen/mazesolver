@@ -228,27 +228,6 @@ public class Graph<V, E extends Edge<V> & Comparable<E>> {
                     }
                 }
             }
-                
-                
-                
-//                double newCost = minVertex.getCost() + edge.getWeight();
-//                V newVertex = edge.getOtherVertex(minVertex.getVertex());
-//                
-//                VertexNode<V> original = new VertexNode<V>(newVertex, vertexCosts.get(newVertex));
-//                
-//                if (vertexCosts.get(newVertex) == Double.POSITIVE_INFINITY) {
-//                    heap.insert(new VertexNode<V>(newVertex, newCost));
-//                    vertexCosts.put(newVertex, newCost);
-//                    allPaths.put(edge.getOtherVertex(minVertex.getVertex()), edge);
-//                } else {
-//                    if (newCost < vertexCosts.get(newVertex)) {
-//                        heap.remove(original);
-//                        heap.insert(new VertexNode<V>(newVertex, newCost));
-//                        vertexCosts.put(newVertex, newCost);
-//                        allPaths.put(edge.getOtherVertex(minVertex.getVertex()), edge);
-//                    }
-//                }
-//            }
         }
         
         if (vertexCosts.get(end) == Double.POSITIVE_INFINITY) {
